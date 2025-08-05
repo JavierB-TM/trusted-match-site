@@ -1,4 +1,3 @@
-// components/Navbar.tsx
 "use client";
 
 import Link from "next/link";
@@ -34,6 +33,18 @@ export default function Navbar() {
             className="text-base font-medium text-gray-700 hover:text-red-600 no-underline transition"
           >
             Consent
+          </Link>
+          <Link
+            href="/features/technology"
+            className="text-base font-medium text-gray-700 hover:text-red-600 no-underline transition"
+          >
+            Technology
+          </Link>
+          <Link
+            href="/espace-client"
+            className="text-base font-medium text-gray-700 hover:text-red-600 no-underline transition"
+          >
+            📁 Espace Client
           </Link>
           <Link
             href="/generate-test-data"

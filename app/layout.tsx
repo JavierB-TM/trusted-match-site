@@ -5,6 +5,7 @@ import "./globals.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import BackToTop from "../components/BackToTop";
+import AuthProvider from "../components/AuthProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,14 +25,18 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <head>
-        {/* Charger Tailwind **avant** le rendu */}
-        <Script src="https://cdn.tailwindcss.com" strategy="beforeInteractive" />
+        {/* Charger Tailwind avant le rendu */}
+        <Script
+          src="https://cdn.tailwindcss.com"
+          strategy="beforeInteractive"
+        />
       </head>
-      {/* pt-16 décalle tout le contenu sous la NavBar fixe */}
       <body className="pt-16 font-sans min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-grow">
+        <AuthProvider>
+          <main className="flex-grow">
           {children}
+        </AuthProvider>
         </main>
         <Footer />
         <BackToTop />
@@ -39,5 +44,7 @@ export default function RootLayout({
     </html>
   );
 }
+
+
 
 
