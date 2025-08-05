@@ -2,7 +2,6 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { generateTestData } from '@/lib/testDataUtils';
 
 type ComparisonMethod = 'exact' | 'fuzzy' | 'encrypted' | 'hashed' | 'sha256';
 
@@ -48,23 +47,55 @@ export default function ComparePage() {
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string>('');
   const [isClient, setIsClient] = useState(false);
+  
+  // Test data generation state
+  const [showTestDataConfig, setShowTestDataConfig] = useState(false);
+  const [testDataConfig, setTestDataConfig] = useState({
+    file1Size: 1000,
+    file2Size: 1000,
+    intersectionPercent: 20
+  });
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
+  const handleShowTestDataConfig = () => {
+    setShowTestDataConfig(true);
+  };
+
   const handleGenerateTestData = useCallback(async () => {
     try {
       setIsLoading(true);
-      generateTestData(1000, 500, 200);
-      setResult('Test data generated successfully!');
+      setError('');
+      
+      // Call the API to generate test data
+      const response = await fetch('/api/generate-test-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          size1: testDataConfig.file1Size,
+          size2: testDataConfig.file2Size,
+          intersectionPercent: testDataConfig.intersectionPercent
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate test data');
+      }
+
+      const data = await response.json();
+      setResult(`Test data generated successfully! Files: ${data.file1Path} and ${data.file2Path}`);
+      setShowTestDataConfig(false);
     } catch (error) {
       console.error('Failed to generate test data:', error);
       setError('Failed to generate test data');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [testDataConfig]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,7 +156,7 @@ export default function ComparePage() {
             <div className="text-center">
               <button
                 type="button"
-                onClick={handleGenerateTestData}
+                onClick={handleShowTestDataConfig}
                 disabled={isLoading}
                 className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
               >
@@ -135,37 +166,40 @@ export default function ComparePage() {
 
             {/* Method Selection */}
             <div className="mb-3 md:mb-4">
-              <fieldset>
-                <legend className="text-base md:text-lg font-medium text-gray-900 mb-2">Comparison Method</legend>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3">
-                  {Object.entries(METHODS).map(([key, method]) => (
-                    <label
-                      key={key}
-                      aria-label={`Select ${method.name} comparison method`}
-                      className={`p-3 border rounded-lg cursor-pointer transition-colors text-sm ${
-                        selectedMethod === key
-                          ? 'border-red-500 bg-red-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex items-start">
-                        <input
-                          type="radio"
-                          name="comparisonMethod"
-                          value={key}
-                          checked={selectedMethod === key}
-                          onChange={() => setSelectedMethod(key as ComparisonMethod)}
-                          className="mt-0.5 w-3.5 h-3.5 text-red-600 border-gray-400 focus:ring-red-500 mr-2 flex-shrink-0"
-                        />
-                        <div>
-                          <h3 className="font-medium text-gray-900">{method.name}</h3>
-                          <p className="text-xs text-gray-500">{method.description}</p>
-                        </div>
+              <label htmlFor="method-select" className="block text-base md:text-lg font-medium text-gray-900 mb-2">
+                Comparison Method
+              </label>
+              <select
+                id="method-select"
+                value={selectedMethod}
+                onChange={(e) => setSelectedMethod(e.target.value as ComparisonMethod)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 text-sm"
+              >
+                {Object.entries(METHODS).map(([key, method]) => (
+                  <option key={key} value={key}>
+                    {method.name}
+                  </option>
+                ))}
+              </select>
+              
+              {/* Selected Method Info */}
+              <div className="mt-3 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                <div className="flex items-start">
+                  <div className="w-3 h-3 bg-red-500 rounded-full mt-1 mr-3 flex-shrink-0"></div>
+                  <div>
+                    <h3 className="font-medium text-gray-900 mb-1">{METHODS[selectedMethod].name}</h3>
+                    <p className="text-sm text-gray-600 mb-2">{METHODS[selectedMethod].description}</p>
+                    {METHODS[selectedMethod].requiresKeyPair && (
+                      <div className="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+                        <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                        </svg>
+                        Requires Key Pair
                       </div>
-                    </label>
-                  ))}
+                    )}
+                  </div>
                 </div>
-              </fieldset>
+              </div>
             </div>
 
             {/* File Upload */}
@@ -228,6 +262,85 @@ export default function ComparePage() {
           )}
         </div>
       </div>
+
+      {/* Test Data Configuration Modal */}
+      {showTestDataConfig && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Configure Test Data</h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="file1-size" className="block text-sm font-medium text-gray-700 mb-1">
+                    File 1 Size (number of emails)
+                  </label>
+                  <input
+                    id="file1-size"
+                    type="number"
+                    min="1"
+                    max="10000000"
+                    value={testDataConfig.file1Size}
+                    onChange={(e) => setTestDataConfig({...testDataConfig, file1Size: parseInt(e.target.value) || 1})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="file2-size" className="block text-sm font-medium text-gray-700 mb-1">
+                    File 2 Size (number of emails)
+                  </label>
+                  <input
+                    id="file2-size"
+                    type="number"
+                    min="1"
+                    max="10000000"
+                    value={testDataConfig.file2Size}
+                    onChange={(e) => setTestDataConfig({...testDataConfig, file2Size: parseInt(e.target.value) || 1})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="intersection-percent" className="block text-sm font-medium text-gray-700 mb-1">
+                    Intersection % (of File 1)
+                  </label>
+                  <input
+                    id="intersection-percent"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={testDataConfig.intersectionPercent}
+                    onChange={(e) => setTestDataConfig({...testDataConfig, intersectionPercent: parseInt(e.target.value) || 0})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Percentage of File 1 emails that will also appear in File 2
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowTestDataConfig(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleGenerateTestData}
+                  disabled={isLoading}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                >
+                  {isLoading ? 'Generating...' : 'Generate Files'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
