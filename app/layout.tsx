@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import BackToTop from "../components/BackToTop";
 
 const inter = Inter({
@@ -27,9 +28,12 @@ export default function RootLayout({
         <Script src="https://cdn.tailwindcss.com" strategy="beforeInteractive" />
       </head>
       {/* pt-16 décalle tout le contenu sous la NavBar fixe */}
-      <body className="pt-16 font-sans">
+      <body className="pt-16 font-sans min-h-screen flex flex-col">
         <Navbar />
-        {children}
+        <main className="flex-grow">
+          {children}
+        </main>
+        <Footer />
         <BackToTop />
       </body>
     </html>

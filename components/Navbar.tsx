@@ -35,6 +35,12 @@ export default function Navbar() {
           >
             Consent
           </Link>
+          <Link
+            href="/generate-test-data"
+            className="ml-2 px-3 py-1 bg-red-100 text-red-700 text-sm font-medium rounded-full hover:bg-red-200 transition"
+          >
+            Test Data Generator
+          </Link>
         </div>
       </div>
     </nav>
