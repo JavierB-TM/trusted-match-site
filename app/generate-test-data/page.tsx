@@ -92,6 +92,7 @@ export default function GenerateTestDataPage() {
                 onChange={(e) => setConfig({...config, size1: parseInt(e.target.value) || 0})}
                 disabled={isGenerating}
                 className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
+                suppressHydrationWarning
               />
             </div>
 
@@ -109,6 +110,7 @@ export default function GenerateTestDataPage() {
                 onChange={(e) => setConfig({...config, size2: parseInt(e.target.value) || 0})}
                 disabled={isGenerating}
                 className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
+                suppressHydrationWarning
               />
             </div>
 
@@ -126,6 +128,7 @@ export default function GenerateTestDataPage() {
                 onChange={(e) => setConfig({...config, intersection: parseInt(e.target.value) || 0})}
                 disabled={isGenerating}
                 className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
+                suppressHydrationWarning
               />
             </div>
           </div>

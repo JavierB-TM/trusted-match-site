@@ -1,6 +1,5 @@
 // app/layout.tsx
 import { Inter } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -25,21 +24,20 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <head>
-        {/* Charger Tailwind avant le rendu */}
-        <Script
-          src="https://cdn.tailwindcss.com"
-          strategy="beforeInteractive"
-        />
       </head>
-      <body className="pt-16 font-sans min-h-screen flex flex-col">
-        <Navbar />
-        <AuthProvider>
-          <main className="flex-grow">
-          {children}
-        </AuthProvider>
-        </main>
-        <Footer />
-        <BackToTop />
+      <body className="font-sans min-h-screen flex flex-col">
+        <div className="flex flex-col min-h-screen">
+          <Navbar />
+          <AuthProvider>
+            <main className="flex-1 px-4 py-2 overflow-auto">
+              <div className="max-w-7xl mx-auto w-full">
+                {children}
+              </div>
+            </main>
+          </AuthProvider>
+          <Footer />
+          <BackToTop />
+        </div>
       </body>
     </html>
   );

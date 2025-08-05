@@ -52,11 +52,11 @@ const CONTENT: Record<string, { title: string; paragraphs: string[] }> = {
 };
 
 type Props = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
-const FeaturePage: FC<Props> = ({ params }) => {
-  const slug = params.slug;
+const FeaturePage: FC<Props> = async ({ params }) => {
+  const { slug } = await params;
   const page = CONTENT[slug];
 
   if (!page) {
