@@ -18,19 +18,19 @@ export const metadata = {
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang="en" className={inter.variable}>
       <head>
       </head>
-      <body className="font-sans min-h-screen flex flex-col">
-        <div className="flex flex-col min-h-screen">
+      <body className="font-sans h-screen flex flex-col overflow-hidden">
+        <div className="flex flex-col h-full">
           <Navbar />
           <AuthProvider>
-            <main className="flex-1 px-4 py-2 overflow-auto">
-              <div className="max-w-7xl mx-auto w-full">
+            <main className="flex-1 overflow-auto">
+              <div className="max-w-7xl mx-auto w-full h-full px-4 py-2">
                 {children}
               </div>
             </main>

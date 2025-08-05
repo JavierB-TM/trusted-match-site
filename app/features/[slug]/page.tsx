@@ -78,7 +78,7 @@ const FeaturePage: FC<Props> = async ({ params }) => {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold mb-6">{page.title}</h1>
         {page.paragraphs.map((p, i) => (
-          <p key={i} className="text-gray-700 mb-4">
+          <p key={`paragraph-${i}-${p.slice(0, 20)}`} className="text-gray-700 mb-4">
             {p}
           </p>
         ))}

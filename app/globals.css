@@ -1,7 +1,15 @@
 /* app/globals.css */
+
+/*
+ * Tailwind CSS directives - these are valid and required for Tailwind CSS
+ * The @tailwind directives are processed by PostCSS and Tailwind CSS
+ * CSS linters may show warnings but these should be ignored
+ */
+/* css-ignore-start */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* css-ignore-end */
 
 *,
 *::before,

@@ -60,6 +60,59 @@ function parseCSVContent(content: string): string[] {
   return emails;
 }
 
+// Helper function for exact comparison
+function performExactComparison(emails1: string[], emails2: string[]): number {
+  console.log('Starting exact comparison...');
+  
+  const [smallerEmails, largerEmails] = emails1.length <= emails2.length 
+    ? [emails1, emails2] 
+    : [emails2, emails1];
+  
+  const emailSet = new Set(smallerEmails);
+  let commonCount = 0;
+  
+  for (const email of largerEmails) {
+    if (emailSet.has(email)) {
+      commonCount++;
+    }
+  }
+  
+  return commonCount;
+}
+
+// Helper function for SHA-256 comparison
+function performSha256Comparison(emails1: string[], emails2: string[]): number {
+  console.log('Starting SHA-256 comparison...');
+  
+  const hash1 = new Set(emails1.map(email => sha256(email.toLowerCase().trim())));
+  const hash2 = new Set(emails2.map(email => sha256(email.toLowerCase().trim())));
+  
+  const [smallerHashes, largerHashes] = hash1.size <= hash2.size 
+    ? [hash1, hash2] 
+    : [hash2, hash1];
+  
+  let commonCount = 0;
+  for (const hash of largerHashes) {
+    if (smallerHashes.has(hash)) {
+      commonCount++;
+    }
+  }
+  
+  return commonCount;
+}
+
+// Helper function to perform comparison based on method
+function performComparison(emails1: string[], emails2: string[], method: string): number {
+  switch (method) {
+    case 'exact':
+      return performExactComparison(emails1, emails2);
+    case 'sha256':
+      return performSha256Comparison(emails1, emails2);
+    default:
+      throw new Error(`Comparison method '${method}' is not implemented yet`);
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -78,7 +131,7 @@ export async function POST(request: NextRequest) {
     
     const startTime = performance.now();
     
-    // Read file contents
+    // Read and parse file contents
     const [content1, content2] = await Promise.all([
       file1.text(),
       file2.text()
@@ -86,53 +139,13 @@ export async function POST(request: NextRequest) {
     
     console.log('Files read, starting parsing...');
     
-    // Parse CSV contents
     const emails1 = parseCSVContent(content1);
     const emails2 = parseCSVContent(content2);
     
     console.log(`Parsed ${emails1.length} emails from file1 and ${emails2.length} emails from file2`);
     
-    let commonCount = 0;
-    
-    if (method === 'exact') {
-      // Convert smaller array to Set for efficient O(1) lookups
-      const [smallerEmails, largerEmails] = emails1.length <= emails2.length 
-        ? [emails1, emails2] 
-        : [emails2, emails1];
-      
-      const emailSet = new Set(smallerEmails);
-      
-      console.log('Starting exact comparison...');
-      
-      // Count matches
-      for (const email of largerEmails) {
-        if (emailSet.has(email)) {
-          commonCount++;
-        }
-      }
-    } else if (method === 'sha256') {
-      console.log('Starting SHA-256 comparison...');
-      
-      // Hash all emails in both files
-      const hash1 = new Set(emails1.map(email => sha256(email.toLowerCase().trim())));
-      const hash2 = new Set(emails2.map(email => sha256(email.toLowerCase().trim())));
-      
-      // Find intersection of hashes
-      const [smallerHashes, largerHashes] = hash1.size <= hash2.size 
-        ? [hash1, hash2] 
-        : [hash2, hash1];
-      
-      for (const hash of largerHashes) {
-        if (smallerHashes.has(hash)) {
-          commonCount++;
-        }
-      }
-    } else {
-      return NextResponse.json(
-        { error: `Comparison method '${method}' is not implemented yet` },
-        { status: 400 }
-      );
-    }
+    // Perform comparison
+    const commonCount = performComparison(emails1, emails2, method);
     
     const executionTime = performance.now() - startTime;
     

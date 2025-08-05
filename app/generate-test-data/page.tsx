@@ -79,7 +79,7 @@ export default function GenerateTestDataPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="size1" className="block text-sm font-medium text-gray-700 mb-2">
                 File 1 Size
               </label>
               <input
@@ -97,7 +97,7 @@ export default function GenerateTestDataPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="size2" className="block text-sm font-medium text-gray-700 mb-2">
                 File 2 Size
               </label>
               <input
@@ -115,7 +115,7 @@ export default function GenerateTestDataPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="intersection" className="block text-sm font-medium text-gray-700 mb-2">
                 Intersection %
               </label>
               <input

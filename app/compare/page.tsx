@@ -1,7 +1,7 @@
 // app/compare/page.tsx
 'use client';
 
-import React, { useState, useRef, ChangeEvent, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { generateTestData } from '@/lib/testDataUtils';
 
 type ComparisonMethod = 'exact' | 'fuzzy' | 'encrypted' | 'hashed' | 'sha256';
@@ -56,9 +56,10 @@ export default function ComparePage() {
   const handleGenerateTestData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const testData = await generateTestData(1000, 500, 200);
+      generateTestData(1000, 500, 200);
       setResult('Test data generated successfully!');
     } catch (error) {
+      console.error('Failed to generate test data:', error);
       setError('Failed to generate test data');
     } finally {
       setIsLoading(false);
@@ -80,6 +81,7 @@ export default function ComparePage() {
       // Simulate comparison logic
       setResult('Comparison completed successfully!');
     } catch (error) {
+      console.error('Comparison error:', error);
       setError('An error occurred during comparison');
     } finally {
       setIsLoading(false);
@@ -133,43 +135,47 @@ export default function ComparePage() {
 
             {/* Method Selection */}
             <div className="mb-3 md:mb-4">
-              <h2 className="text-base md:text-lg font-medium text-gray-900 mb-2">Comparison Method</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3">
-                {Object.entries(METHODS).map(([key, method]) => (
-                  <div
-                    key={key}
-                    onClick={() => setSelectedMethod(key as ComparisonMethod)}
-                    className={`p-3 border rounded-lg cursor-pointer transition-colors text-sm ${
-                      selectedMethod === key
-                        ? 'border-red-500 bg-red-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="flex items-start">
-                      <div
-                        className={`mt-0.5 w-3.5 h-3.5 rounded-full border-2 mr-2 flex-shrink-0 ${
-                          selectedMethod === key
-                            ? 'border-red-500 bg-red-500'
-                            : 'border-gray-400'
-                        }`}
-                      />
-                      <div>
-                        <h3 className="font-medium text-gray-900">{method.name}</h3>
-                        <p className="text-xs text-gray-500">{method.description}</p>
+              <fieldset>
+                <legend className="text-base md:text-lg font-medium text-gray-900 mb-2">Comparison Method</legend>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3">
+                  {Object.entries(METHODS).map(([key, method]) => (
+                    <label
+                      key={key}
+                      aria-label={`Select ${method.name} comparison method`}
+                      className={`p-3 border rounded-lg cursor-pointer transition-colors text-sm ${
+                        selectedMethod === key
+                          ? 'border-red-500 bg-red-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-start">
+                        <input
+                          type="radio"
+                          name="comparisonMethod"
+                          value={key}
+                          checked={selectedMethod === key}
+                          onChange={() => setSelectedMethod(key as ComparisonMethod)}
+                          className="mt-0.5 w-3.5 h-3.5 text-red-600 border-gray-400 focus:ring-red-500 mr-2 flex-shrink-0"
+                        />
+                        <div>
+                          <h3 className="font-medium text-gray-900">{method.name}</h3>
+                          <p className="text-xs text-gray-500">{method.description}</p>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
             </div>
 
             {/* File Upload */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="file1" className="block text-sm font-medium text-gray-700 mb-2">
                   First Dataset
                 </label>
                 <input
+                  id="file1"
                   type="file"
                   accept=".csv"
                   onChange={(e) => setFile1(e.target.files?.[0] || null)}
@@ -177,10 +183,11 @@ export default function ComparePage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="file2" className="block text-sm font-medium text-gray-700 mb-2">
                   Second Dataset
                 </label>
                 <input
+                  id="file2"
                   type="file"
                   accept=".csv"
                   onChange={(e) => setFile2(e.target.files?.[0] || null)}
